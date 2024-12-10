@@ -1,7 +1,6 @@
 import { getPuzzleInput } from '../getInput';
 
 const input = getPuzzleInput(1).split("\n");
-console.log(input)
 const listOne: number[] = [];
 const listTwo: number[] = [];
 
@@ -20,3 +19,11 @@ for(let i = 0 ; i < listOne.length; i++){
 }
 
 console.log("Part 1: ", sum)
+
+let total = 0;
+for(const num of listOne){
+	const newList = listTwo.filter(a => a === num);
+	total += num * newList.length;
+}
+
+console.log("Part 2: ", total);
