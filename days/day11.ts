@@ -1,3 +1,3 @@
 import { getPuzzleInput } from '../getInput';
 
-const input = getPuzzleInput(11);
+const input = getPuzzleInput(11, true);
