@@ -1,3 +1,3 @@
 import { getPuzzleInput } from '../getInput';
 
-const input = getPuzzleInput(1, true).split('\n');
+const input = getPuzzleInput(14, true).split('\n');
