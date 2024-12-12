@@ -7,7 +7,7 @@ let y = 0;
 let width = input[0].length;
 let height = input.length;
 let currentObs = {x: 0, y: 0, visited: 0}
-
+const time = Date.now();
 
 function getGuard(input: string[][]){
 	for(let i = 0; i < height; i++){
@@ -185,4 +185,5 @@ for(let i = 0; i < steps + 1; i++){
 
 
 console.log("Part 2:", total);
+console.log(Date.now() - time)
 
