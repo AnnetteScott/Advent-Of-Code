@@ -39,7 +39,7 @@ function solveEquations(eqA: Equation, eqB: Equation) {
 
     const determinant = a1 * b2 - a2 * b1;
     
-    // Substitution method
+    // Cramer's method
     const a = (c1 * b2 - c2 * b1) / determinant;
     const b = (a1 * c2 - a2 * c1) / determinant;
 
