@@ -106,5 +106,3 @@ for(const [type, points] of nodes.entries()){
 }
 
 console.log("Part 2:", count());
-
-
