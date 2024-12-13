@@ -1,91 +1,49 @@
 import { getPuzzleInput } from '../getInput';
 
-const input = getPuzzleInput(13, true).split('\n');
+const input = getPuzzleInput(13, false).split('\n');
 
-class Point {
-	x: number;
-	y: number;
-	constructor(x: number, y: number){
-		this.x = x;
-		this.y = y;
+class Equation {
+	a: number;
+	b: number;
+	c: number;
+	constructor(a: number, b: number, c: number){
+		this.a = a;
+		this.b = b;
+		this.c = c;
 	}
 }
-
-class Button {
-	x: number;
-	y: number;
-	cost: number;
-	constructor(x: number, y: number, cost: number){
-		this.x = x;
-		this.y = y;
-		this.cost = cost;
-	}
-}
-
-class Machine {
-	buttonA: Button;
-	buttonB: Button;
-	prize: Point;
-	cheapest: number | null;
-	currentPoint: Point;
-
-	constructor(buttonA: Button, buttonB: Button, prize: Point){
-		this.buttonA = buttonA;
-		this.buttonB = buttonB;
-		this.prize = prize;
-		this.cheapest = null;
-		this.currentPoint = new Point(0, 0);
-	}
-}
-
-const machines: Machine[] = []
 
 let i = 0;
 const regex = /X[+=](-?\d+),\s*Y[+=](-?\d+)/;
 const add = 10000000000000;
+let currentTokens = 0;
 while(i < input.length){
 	const a = input[i].match(regex) ?? [];
 	const b = input[i + 1].match(regex) ?? [];
 	const p = input[i + 2].match(regex) ?? [];
 
-	const buttonA = new Button(parseInt(a[1]), parseInt(a[2]), 3);
-	const buttonB = new Button(parseInt(b[1]), parseInt(b[2]), 1);
-	const prize = new Point(parseInt(p[1]) + add, parseInt(p[2]) + add);
+	const eqA = new Equation(parseInt(a[1]), parseInt(b[1]), parseInt(p[1]) + add);
+	const eqB = new Equation(parseInt(a[2]), parseInt(b[2]), parseInt(p[2]) + add);
 
-	const machine = new Machine(buttonA, buttonB, prize);
-	machines.push(machine);
+	const outcome = solveEquations(eqA, eqB);
+	if(outcome.a % 1 === 0 && outcome.b % 1 === 0){
+		currentTokens += outcome.a * 3 + outcome.b * 1
+	}
 
 	i += 4;
 }
 
+function solveEquations(eqA: Equation, eqB: Equation) {
+    const a1 = eqA.a, b1 = eqA.b, c1 = eqA.c;
+    const a2 = eqB.a, b2 = eqB.b, c2 = eqB.c;
 
-for(const machine of machines){
-	for(let i = 0; i <= add; i++){
-		for(let j = 0; j <= add; j++){
-			machine.currentPoint.x = machine.buttonA.x * i + machine.buttonB.x * j; 
-			machine.currentPoint.y = machine.buttonA.y * i + machine.buttonB.y * j;
-			let currentCost = machine.buttonA.cost * i + machine.buttonB.cost * j;
-			atPrize(machine, currentCost);
-			if(machine.currentPoint.x > machine.prize.x || machine.currentPoint.y > machine.prize.y){
-				break;
-			}
-		}
-	}
+    const determinant = a1 * b2 - a2 * b1;
+    
+    // Substitution method
+    const a = (c1 * b2 - c2 * b1) / determinant;
+    const b = (a1 * c2 - a2 * c1) / determinant;
+
+    return { a, b };
 }
 
-function atPrize(machine: Machine, cost: number){
-	if(machine.currentPoint.x === machine.prize.x && machine.currentPoint.y === machine.prize.y){
-		if(machine.cheapest === null || cost < machine.cheapest){
-			machine.cheapest = cost;
-		}
-	}
-}
-
-let totalTokens = 0;
-for(const machine of machines){
-	if(machine.cheapest != null){
-		totalTokens += machine.cheapest;
-	}
-}
-
-console.log("Tokens:", totalTokens)
+console.log("Tokens: ", currentTokens)
