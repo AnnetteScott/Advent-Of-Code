@@ -1,6 +1,6 @@
 import { getPuzzleInput } from '../getInput';
 
-const input = getPuzzleInput(12, true).split('\n').map(a => a.split(""));
+const input = getPuzzleInput(12, false).split('\n').map(a => a.split(""));
 
 class Point {
 	x: number;
@@ -12,6 +12,10 @@ class Point {
 
 	copy(){
 		return new Point(this.x, this.y);
+	}
+
+	isEqual(point: Point){
+		return point.x === this.x && point.y === this.y;
 	}
 
 	constructor(x: number, y: number){
@@ -109,7 +113,74 @@ function getFencePrice(){
 
 
 console.log("Part 1:", getFencePrice())
-console.log(garden)
+
+function getSides(){
+	let sum = 0;
+	for(const region of garden){
+		let sides = 0;
+		for(const plant of region){
+			const up = new Point(plant.position.x, plant.position.y - 1);
+			const down = new Point(plant.position.x, plant.position.y + 1);
+			const left = new Point(plant.position.x - 1, plant.position.y);
+			const right = new Point(plant.position.x + 1, plant.position.y);
+
+			//Top Left
+			if(!inRegion(up, region) && !inRegion(left, region)){
+				sides++;
+			}
+
+			//Top Right
+			if(!inRegion(up, region) && !inRegion(right, region)){
+				sides++;
+			}
+
+			//Bottom Left
+			if(!inRegion(down, region) && !inRegion(left, region)){
+				sides++;
+			}
+
+			//Bottom Right
+			if(!inRegion(down, region) && !inRegion(right, region)){
+				sides++;
+			}
+
+			if(inRegion(up, region) && inRegion(right, region)) {
+				const topRight = new Point(right.x, up.y);
+				if (!inRegion(topRight, region)) {
+					sides++;
+				}
+			}
+
+			if(inRegion(right, region) && inRegion(down, region)) {
+				const rightDown = new Point(right.x, down.y);
+				if (!inRegion(rightDown, region)) {
+					sides++;
+				}
+			}
+
+			if(inRegion(down, region) && inRegion(left, region)) {
+				const downLeft = new Point(left.x, down.y);
+				if (!inRegion(downLeft, region)) {
+					sides++;
+				}
+			}
+
+			if(inRegion(left, region) && inRegion(up, region)) {
+				const leftTop = new Point(left.x, up.y);
+				if (!inRegion(leftTop, region)) {
+					sides++;
+				}
+			}
+		}
+
+		sum += region.length * sides;
+	}
+	return sum;
 }
 
-getSides()
+function inRegion(point: Point, region: Plant[]){
+	const items = region.filter(a => a.position.isEqual(point));
+	return items.length !== 0;
+}
+
+console.log("Part 2:", getSides());
