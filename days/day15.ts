@@ -1,5 +1,4 @@
 import { getPuzzleInput } from '../getInput';
-import * as fs from "fs";
 
 class Point {
 	x: number;
@@ -153,7 +152,6 @@ function scaleUp(){
 
 const scaleMaze = scaleUp()
 getRobot(scaleMaze);
-let output = "";
 
 function partTwo(){
 	const width = scaleMaze[0].length;
@@ -251,8 +249,6 @@ function partTwo(){
 	for(const line of instructions){
 		for(const instr of line){
 			move(instr);
-			output += scaleMaze.map(a => a.join('')).join("\n");
-			output += "\n\n";
 		}
 	}
 	
@@ -268,11 +264,7 @@ function partTwo(){
 		return sum;
 	}
 	
-	//console.log(scaleMaze.map(a => a.join('')).join("\n"));
 	console.log("Part 2:", checkSum());
 }
 
 partTwo();
-fs.writeFileSync(`../day15.txt`, output, "utf8");
-// ??
-//1417290
