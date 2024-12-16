@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 
 export function getPuzzleInput (day: number, test = false) {
 	const dayStr = day.toString().padStart(2, '0');
