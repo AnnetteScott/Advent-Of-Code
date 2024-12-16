@@ -71,12 +71,13 @@ export function print2d(output: any[][]){
 	console.log(output.map(a => a.join('')).join("\n"));
 }
 
-export function dijkstraRotation(grid: string[][], start: Point, target: Point): number | null {
+export function dijkstraRotation(grid: string[][], start: Point, target: Point): {path: Point[], cost: number} | null {
 	const height = grid.length;
 	const width = grid[0].length;
 
 	const queue: NodeDirection[] = [];
 	const costs: Record<string, number> = {};
+	const parents: (Point | null)[][] = Array.from({ length: height }, () => Array(width).fill(null));
 
 	queue.push({ point: start, direction: 0, cost: 0 });
 	costs[`${start.x},${start.y},1`] = 0;
@@ -88,7 +89,16 @@ export function dijkstraRotation(grid: string[][], start: Point, target: Point):
 		const { point, direction, cost } = current;
 
 		if(point.x === target.x && point.y === target.y){
-			return cost;
+			// Reconstruct path
+			const path: Point[] = [];
+			let current: Point | null = point;
+	  
+			while (current) {
+				path.push(current);
+				current = parents[current.y][current.x];
+			}
+	  
+			return {path: path.reverse(), cost};
 		}
 
 		const forward = new Point(
@@ -105,6 +115,7 @@ export function dijkstraRotation(grid: string[][], start: Point, target: Point):
 
 			if(newCost < (costs[forwardKey] ?? Infinity)){
 				costs[forwardKey] = newCost;
+				parents[forward.y][forward.x] = point;
 				queue.push({ point: forward, direction, cost: newCost });
 			}
 		}
