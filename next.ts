@@ -21,7 +21,7 @@ fs.mkdirSync(`./${year}/inputs/${day}`, { recursive: true });
 
 fs.writeFileSync(`./${year}/days/day${day}.ts`, 
 	`import { getPuzzleInput } from '../getInput';\n` +
-	`import {type Point, print2d, printToFile } from '../../common'` +
+	`import { Point, print2d, printToFile, directions } from '../../common'` +
 	`\n\nconst input = getPuzzleInput(${i}, true).split('\\n');`, 
 	"utf8"
 );

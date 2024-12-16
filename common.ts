@@ -2,7 +2,7 @@ import * as fs from "fs";
 export class Point {
 	x: number;
 	y: number;
-	value: string;
+	value: string | number;
 	maxWidth: number;
 	maxHeight: number;
 
@@ -18,7 +18,23 @@ export class Point {
 		return point.x === this.x && point.y === this.y;
 	}
 
-	constructor(x: number, y: number, value: string, width: number, height: number){
+	toString(){
+		return `${this.x},${this.y}`
+	}
+
+	nextNewX(dx: -1 | 1){
+		const item = this.copy();
+		item.x += dx;
+		return item;
+	}
+
+	nextNewY(dy: -1 | 1){
+		const item = this.copy();
+		item.y += dy;
+		return item;
+	}
+
+	constructor(x: number, y: number, value: string | number, width: number, height: number){
 		this.x = x;
 		this.y = y;
 		this.value = value;
@@ -26,6 +42,13 @@ export class Point {
 		this.maxHeight = height;
 	}
 }
+
+export const directions = {
+	'<': {dx: -1, dy: 0},
+	'>': {dx: 1, dy: 0},
+	'^': {dx: 0, dy: -1},
+	'v': {dx: 0, dy: 1},
+} as {[key: string]: {dx: number, dy: number}}
 
 export function printToFile(day: number, output: string){
 	fs.writeFileSync(`./outputs/${day}`, output, "utf8");
