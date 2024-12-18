@@ -7,7 +7,7 @@ export class Point {
 	maxHeight: number;
 
 	isInBounds(){
-		return this.x >= 0 && this.y >= 0 && this.x < this.maxWidth && this.y < this.maxHeight;
+		return this.x >= 0 && this.y >= 0 && this.x <= this.maxWidth && this.y <= this.maxHeight;
 	}
 
 	copy(){
@@ -71,7 +71,65 @@ export function print2d(output: any[][]){
 	console.log(output.map(a => a.join('')).join("\n"));
 }
 
-export function dijkstraRotation(grid: string[][], start: Point, target: Point): {path: Point[], cost: number} | null {
+export function dijkstra(grid: string[][], start: Point, target: Point): Point[] {
+	const height = grid.length;
+	const width = grid[0].length;
+
+	const pq: Node[] = [];
+	const distances: number[][] = Array.from({ length: height }, () => Array(width).fill(Infinity));
+	const prev: (Point | null)[][] = Array.from({ length: height }, () => Array(width).fill(null));
+
+	distances[start.y][start.x] = 0;
+	pq.push({ point: start, cost: 0 });
+	
+	while (pq.length > 0) {
+		// Sort the queue to simulate a priority queue
+		pq.sort((a, b) => a.cost - b.cost);
+		const { point, cost } = pq.shift()!;
+		
+		if (point.x === target.x && point.y === target.y) {
+			// Reconstruct path
+			const path: Point[] = [];
+			let current: Point | null = point;
+			
+			while (current) {
+				path.push(current);
+				current = prev[current.y][current.x];
+			}
+			
+			return path.reverse();
+		}
+		
+		// Explore neighbors
+		for (const dir of Object.values(directions)) {
+			const newX = point.x + dir.dx;
+			const newY = point.y + dir.dy;
+			
+			const newPoint = new Point(
+				newX,
+				newY,
+				'',
+				width - 1,
+				height - 1
+			);
+			
+			
+			if(newPoint.isInBounds() && grid[newY][newX] !== '#'){
+				const newCost = cost + 1;
+				
+				if(newCost < distances[newY][newX]){
+					distances[newY][newX] = newCost;
+					prev[newY][newX] = point;
+					pq.push({ point: newPoint, cost: newCost });
+				}
+			}
+		}
+	}
+
+	return [];
+}
+
+export function dijkstraRotation(grid: string[][], start: Point, target: Point, turnCost: number): {path: Point[], cost: number} {
 	const height = grid.length;
 	const width = grid[0].length;
 
@@ -104,7 +162,7 @@ export function dijkstraRotation(grid: string[][], start: Point, target: Point):
 		const forward = new Point(
 			point.x + Object.values(directions)[direction].dx,
 			point.y + Object.values(directions)[direction].dy,
-			'',
+			'O',
 			width,
 			height
 		);
@@ -122,21 +180,21 @@ export function dijkstraRotation(grid: string[][], start: Point, target: Point):
 
 		const clockwiseDirection = (direction + 1) % 4;
 		const clockwiseKey = `${point.x},${point.y},${clockwiseDirection}`;
-		const turnCost = cost + 1000;
+		const ckTurnCost = cost + turnCost;
 
-		if(turnCost < (costs[clockwiseKey] ?? Infinity)){
-			costs[clockwiseKey] = turnCost;
-			queue.push({ point, direction: clockwiseDirection, cost: turnCost });
+		if(ckTurnCost < (costs[clockwiseKey] ?? Infinity)){
+			costs[clockwiseKey] = ckTurnCost;
+			queue.push({ point, direction: clockwiseDirection, cost: ckTurnCost });
 		}
 
 		const counterDirection = (direction + 3) % 4;
 		const counterKey = `${point.x},${point.y},${counterDirection}`;
 
-		if(turnCost < (costs[counterKey] ?? Infinity)){
-			costs[counterKey] = turnCost;
-			queue.push({ point, direction: counterDirection, cost: turnCost });
+		if(ckTurnCost < (costs[counterKey] ?? Infinity)){
+			costs[counterKey] = ckTurnCost;
+			queue.push({ point, direction: counterDirection, cost: ckTurnCost });
 		}
 	}
 
-	return null;
+	return {path: [], cost: 0};
 }
