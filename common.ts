@@ -100,7 +100,6 @@ export function dijkstra(grid: string[][], start: Point, target: Point): Point[]
 			return path.reverse();
 		}
 		
-		// Explore neighbors
 		for (const dir of Object.values(directions)) {
 			const newX = point.x + dir.dx;
 			const newY = point.y + dir.dy;
