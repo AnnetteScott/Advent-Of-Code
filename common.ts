@@ -46,22 +46,20 @@ export class Point {
 type Node = {
 	point: Point;
 	cost: number;
+	direction: Instructions;
 }
 
-type NodeDirection = {
-	point: Point;
-	cost: number;
-	direction: number;
-}
-
-export type Instructions = "^" | ">" | "<" | "v";
+const instructions = [">" , "v" , "<" , "^"] as const;
+export type Instructions = typeof instructions[number];
 
 export const directions = {
 	'>': {dx: 1, dy: 0},
 	'v': {dx: 0, dy: 1},
 	'<': {dx: -1, dy: 0},
 	'^': {dx: 0, dy: -1},
-} as {[key in Instructions]: {dx: number, dy: number}}
+} as {[key in Instructions]: {dx: number, dy: number}};
+
+type DijkstraQueue = {[key in Instructions]: {dx: number, dy: number, cost: number}};
 
 export function printToFile(day: number, output: string){
 	fs.writeFileSync(`./outputs/${day}`, output, "utf8");
@@ -71,127 +69,70 @@ export function print2d(output: any[][]){
 	console.log(output.map(a => a.join('')).join("\n"));
 }
 
-export function dijkstra(grid: string[][], start: Point, target: Point): Point[] {
+export function dijkstra(grid: string[][], start: Point, target: Point, rotation = false, rotationCost = 1, startingDirection: Instructions = '>'): {path: Point[], cost: number} {
 	const height = grid.length;
 	const width = grid[0].length;
 
-	const pq: Node[] = [];
+	//Priority Queue
+	const queue: Node[] = [];
 	const distances: number[][] = Array.from({ length: height }, () => Array(width).fill(Infinity));
 	const prev: (Point | null)[][] = Array.from({ length: height }, () => Array(width).fill(null));
 
 	distances[start.y][start.x] = 0;
-	pq.push({ point: start, cost: 0 });
+	queue.push({ point: start, cost: 0, direction: startingDirection});
 	
-	while (pq.length > 0) {
-		// Sort the queue to simulate a priority queue
-		pq.sort((a, b) => a.cost - b.cost);
-		const { point, cost } = pq.shift()!;
+	while(queue.length > 0){
+		queue.sort((a, b) => a.cost - b.cost);
+		const { point, cost, direction } = queue.shift()!;
 		
-		if (point.x === target.x && point.y === target.y) {
-			// Reconstruct path
+		if(point.x === target.x && point.y === target.y){
 			const path: Point[] = [];
 			let current: Point | null = point;
-			
+
 			while (current) {
 				path.push(current);
 				current = prev[current.y][current.x];
 			}
 			
-			return path.reverse();
+			return {path: path.reverse(), cost: cost};
+		}
+
+		let neighbors = {} as DijkstraQueue;
+		if(rotation){
+			neighbors[direction] = {dx: directions[direction].dx, dy: directions[direction].dy, cost: 1};
+			const index = instructions.indexOf(direction as Instructions);
+			const clockwise = instructions[(index + 1) % 4];
+			const counter = instructions[(index + 3) % 4];
+			neighbors[clockwise] = {dx: directions[clockwise].dx, dy: directions[clockwise].dy, cost: rotationCost};
+			neighbors[counter] = {dx: directions[counter].dx, dy: directions[counter].dy, cost: rotationCost};
+		}else {
+			for(const str of instructions){
+				neighbors[str] = {dx: directions[str].dx, dy: directions[str].dy, cost: 1}
+			}
 		}
 		
-		for (const dir of Object.values(directions)) {
+		for(const [instr, dir] of Object.entries(neighbors)){
 			const newX = point.x + dir.dx;
 			const newY = point.y + dir.dy;
 			
 			const newPoint = new Point(
 				newX,
 				newY,
-				'',
+				instr,
 				width - 1,
 				height - 1
 			);
 			
 			
 			if(newPoint.isInBounds() && grid[newY][newX] !== '#'){
-				const newCost = cost + 1;
+				const newCost = cost + dir.cost;
 				
 				if(newCost < distances[newY][newX]){
 					distances[newY][newX] = newCost;
 					prev[newY][newX] = point;
-					pq.push({ point: newPoint, cost: newCost });
+					queue.push({ point: newPoint, cost: newCost, direction: instr as Instructions});
 				}
 			}
-		}
-	}
-
-	return [];
-}
-
-export function dijkstraRotation(grid: string[][], start: Point, target: Point, turnCost: number): {path: Point[], cost: number} {
-	const height = grid.length;
-	const width = grid[0].length;
-
-	const queue: NodeDirection[] = [];
-	const costs: Record<string, number> = {};
-	const parents: (Point | null)[][] = Array.from({ length: height }, () => Array(width).fill(null));
-
-	queue.push({ point: start, direction: 0, cost: 0 });
-	costs[`${start.x},${start.y},1`] = 0;
-
-	while(queue.length > 0){
-		queue.sort((a, b) => a.cost - b.cost);
-		const current = queue.shift()!;
-
-		const { point, direction, cost } = current;
-
-		if(point.x === target.x && point.y === target.y){
-			// Reconstruct path
-			const path: Point[] = [];
-			let current: Point | null = point;
-	  
-			while (current) {
-				path.push(current);
-				current = parents[current.y][current.x];
-			}
-	  
-			return {path: path.reverse(), cost};
-		}
-
-		const forward = new Point(
-			point.x + Object.values(directions)[direction].dx,
-			point.y + Object.values(directions)[direction].dy,
-			'O',
-			width,
-			height
-		);
-
-		if(forward.isInBounds() && grid[forward.y][forward.x] !== "#"){
-			const forwardKey = `${forward.x},${forward.y},${direction}`;
-			const newCost = cost + 1;
-
-			if(newCost < (costs[forwardKey] ?? Infinity)){
-				costs[forwardKey] = newCost;
-				parents[forward.y][forward.x] = point;
-				queue.push({ point: forward, direction, cost: newCost });
-			}
-		}
-
-		const clockwiseDirection = (direction + 1) % 4;
-		const clockwiseKey = `${point.x},${point.y},${clockwiseDirection}`;
-		const ckTurnCost = cost + turnCost;
-
-		if(ckTurnCost < (costs[clockwiseKey] ?? Infinity)){
-			costs[clockwiseKey] = ckTurnCost;
-			queue.push({ point, direction: clockwiseDirection, cost: ckTurnCost });
-		}
-
-		const counterDirection = (direction + 3) % 4;
-		const counterKey = `${point.x},${point.y},${counterDirection}`;
-
-		if(ckTurnCost < (costs[counterKey] ?? Infinity)){
-			costs[counterKey] = ckTurnCost;
-			queue.push({ point, direction: counterDirection, cost: ckTurnCost });
 		}
 	}
 
