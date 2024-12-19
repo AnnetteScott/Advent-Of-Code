@@ -69,7 +69,7 @@ export function print2d(output: any[][]){
 	console.log(output.map(a => a.join('')).join("\n"));
 }
 
-export function dijkstra(grid: string[][], start: Point, target: Point, rotation = false, rotationCost = 1, startingDirection: Instructions = '>'): {path: Point[], cost: number} {
+export function dijkstra(grid: string[][], start: Point, target: Point, rotation = false, rotationCost = 1, startingDirection: Instructions = '>'): {paths: Point[][], cost: number} {
 	const height = grid.length;
 	const width = grid[0].length;
 
@@ -94,7 +94,7 @@ export function dijkstra(grid: string[][], start: Point, target: Point, rotation
 				current = prev[current.y][current.x];
 			}
 			
-			return {path: path.reverse(), cost: cost};
+			return {paths: [path.reverse()], cost: cost};
 		}
 
 		let neighbors = {} as DijkstraQueue;
@@ -136,5 +136,5 @@ export function dijkstra(grid: string[][], start: Point, target: Point, rotation
 		}
 	}
 
-	return {path: [], cost: 0};
+	return {paths: [], cost: 0};
 }

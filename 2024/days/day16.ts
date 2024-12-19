@@ -1,6 +1,6 @@
 import { getPuzzleInput } from '../getInput';
 import { Point, dijkstra, print2d } from '../../common'
-const maze = getPuzzleInput(16, false).split('\n').map(a => a.split(""));
+const maze = getPuzzleInput(16, true).split('\n').map(a => a.split(""));
 const height = maze.length;
 const width = maze[0].length;
 
@@ -21,7 +21,10 @@ for(let i = 0; i < height; i++){
 }
 
 const cost = dijkstra(maze, start, end, true, 1001, '>');
-for(let point of cost.path){
-	maze[point.y][point.x] = point.value as string;
+console.log(cost)
+for(let paths of cost.paths){
+	for(let point of paths){
+		maze[point.y][point.x] = "O";
+	}
 }
-console.log(cost.cost)
+print2d(maze)
