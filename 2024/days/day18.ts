@@ -20,14 +20,14 @@ function partOne(grid: string[][]){
 		setGrid(grid, input[i][0], input[i][1])
 	}
 	const path = dijkstra(grid, start, end);
-	console.log(path?.length - 1)
+	console.log(path.cost)
 }
 
 function partTwo(grid: string[][]){
 	for(let i = 0; i < input.length; i++){
 		setGrid(grid, input[i][0], input[i][1])
 		const path = dijkstra(grid, start, end);
-		if(path.length <= 0){
+		if(path.paths.length <= 0){
 			console.log(`${input[i][0]},${input[i][1]}`)
 			return;
 		}
