@@ -1,6 +1,6 @@
 import * as fs from "fs";
 const year = 2024;
-const i = 17;
+const i = 22;
 
 if(!fs.existsSync(`./${year}`)){
 	const write = "import { readFileSync } from 'node:fs';\n\n" +
@@ -21,7 +21,7 @@ fs.mkdirSync(`./${year}/inputs/${day}`, { recursive: true });
 
 fs.writeFileSync(`./${year}/days/day${day}.ts`, 
 	`import { getPuzzleInput } from '../getInput';\n` +
-	`import { Point, print2d, printToFile, directions } from '../../common'` +
+	`import { Point } from '../../common'` +
 	`\n\nconst input = getPuzzleInput(${i}, true).split('\\n');`, 
 	"utf8"
 );
