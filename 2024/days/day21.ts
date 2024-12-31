@@ -1,9 +1,8 @@
 import { getPuzzleInput } from '../getInput';
 import { dijkstra, Point } from '../../common'
 
-const input = getPuzzleInput(21, true).split('\n').map(a => a.split('').map(Number));
+const input = getPuzzleInput(21, false).split('\n').map(a => a.split('').map(Number));
 const codes: number[][] = []
-console.log(input)
 for(const line of input){
 	line[line.length - 1] = 10;
 	codes.push(line)
@@ -31,39 +30,59 @@ grid[0][0] = '#'
 function getCode(code: number[]){	
 	const firstRobot = new Robot();
 	firstRobot.pointed = numericButtons[10];
-	const secondRobot = new Robot();
-	const thirdRobot = new Robot();
-	function move(target: number, robot: Robot, grid: string[][], buttons: Point[]){
-		let pushButtons = "";
+	function move(target: number, robot: Robot, grid: string[][], buttons: Point[]): string[]{
 		const start = robot.pointed;
 		const end = buttons[target];
 		const result = dijkstra(grid, start, end);
-		for(let i = 1; i < result.paths[0].length; i++){
-			pushButtons += result.paths[0][i].value;
+		const allPaths: string[] = []
+
+		for(let path of result.paths){
+			let pushButtons = "";
+			for(let j = 1; j < path.length; j++){
+				pushButtons += path[j].value;
+			}
+			pushButtons += "A"
+			allPaths.push(pushButtons);
 		}
-		robot.pointed = result.paths[0][result.paths[0].length - 1];
-		return pushButtons += "A";
+		robot.pointed = end.copy();
+		return allPaths;
+	}
+	function cartesianProduct(arrays: string[][]) {
+		return arrays.reduce((acc, curr) =>
+			acc.flatMap(a => curr.map(c => `${a}${c}`)), ['']
+		);
 	}
 	
-	let numericMoves: string[] = [];
+	let numericMoves: string[][] = [];
 	for(const key of code){
-		numericMoves.push(...move(key, firstRobot, numericGrid, numericButtons).split(''));
+		numericMoves.push(move(key, firstRobot, numericGrid, numericButtons));
 	}
+
+	function nextRobot(startingMoves: string[]){
+		const robot = new Robot();
+		let robotMoves: string[] = [];
+		for(let comb of startingMoves){
+			let moves: string[][] = [];
+			for(let key of comb.split('')){
+				const target = Object.keys(directions).indexOf(key);
+				moves.push(move(target, robot, grid, Object.values(directions)))
+			}
 	
-	let robotMoves: string[] = []
-	for(const moveKey of numericMoves){
-		const target = Object.keys(directions).indexOf(moveKey);
-		robotMoves.push(...move(target, secondRobot, grid, Object.values(directions)).split(''))
-	}
-	console.log(robotMoves.join(''))
+			robotMoves.push(...cartesianProduct(moves))
+		}
 	
-	let secondMoves: string[] = []
-	for(const moveKey of robotMoves){
-		const target = Object.keys(directions).indexOf(moveKey);
-		secondMoves.push(...move(target, thirdRobot, grid, Object.values(directions)).split(''))
+		robotMoves.sort((a, b) => a.length - b.length);
+		const length = robotMoves[0].length;
+		robotMoves = robotMoves.filter(a => a.length === length);
+		return robotMoves;
 	}
-	console.log(secondMoves.length, parseInt(code.slice(0, code.length - 1).join('')), secondMoves.join(''))
-	return secondMoves.length * parseInt(code.slice(0, code.length - 1).join(''))
+
+	let moves: string[] = cartesianProduct(numericMoves);
+	for(let i = 0; i < 2; i++){
+		moves = nextRobot(moves)
+	}
+
+	return moves[0].length * parseInt(code.slice(0, code.length - 1).join(''))
 }
 
 let sum = 0;
