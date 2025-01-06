@@ -1,7 +1,7 @@
 import { getPuzzleInput } from '../getInput';
 import { dijkstra, Point } from '../../common'
 
-const input = getPuzzleInput(21, false).split('\n').map(a => a.split('').map(Number));
+const input = getPuzzleInput(21, true).split('\n').map(a => a.split('').map(Number));
 const codes: number[][] = []
 for(const line of input){
 	line[line.length - 1] = 10;
@@ -78,9 +78,9 @@ function getCode(code: number[]){
 	}
 
 	let moves: string[] = cartesianProduct(numericMoves);
-	for(let i = 0; i < 2; i++){
+	/* for(let i = 0; i < 1; i++){
 		moves = nextRobot(moves)
-	}
+	} */
 
 	return moves[0].length * parseInt(code.slice(0, code.length - 1).join(''))
 }

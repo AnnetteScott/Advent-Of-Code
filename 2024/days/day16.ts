@@ -20,11 +20,9 @@ for(let i = 0; i < height; i++){
 	}
 }
 
-const cost = dijkstra(maze, start, end, true, 1001, '>');
+const cost = dijkstra(maze, start, end);
 console.log(cost)
-for(let paths of cost.paths){
-	for(let point of paths){
-		maze[point.y][point.x] = "O";
-	}
+for(let point of cost.paths[0]){
+	maze[point.y][point.x] = "O";
 }
 print2d(maze)
